@@ -184,10 +184,10 @@ class ZDOCK(object):
         self.lig_init_trans = np.array(zdock_output_lines[4].split()[1:], dtype='float32')    
         
         self.num_poses = len(zdock_output_lines[5:])
-        self.zdock_output_data = np.zeros((self.num_poses,6), dtype='float32')
+        self.zdock_output_data = np.zeros((self.num_poses,7), dtype='float32')
 
         for idx, trans_rot_data in enumerate(zdock_output_lines[5:]):
-            self.zdock_output_data[idx,:] = np.array(trans_rot_data.split()[0:-1], dtype='float32')
+            self.zdock_output_data[idx,:] = np.array(trans_rot_data.split(), dtype='float32')
             self.zdock_output_data[idx,:3] = self.zdock_output_data[idx,2::-1] # Reverse the order of the Euler angles
 
     def get_num_poses(self):
@@ -214,7 +214,7 @@ class ZDOCK(object):
         """
         current_mobile_coord = self.mobile_origin_coord
 
-        self.static_mobile_copy_uni.trajectory.ts._pos[self.static_num_atoms:,:] = self.zdock_trans_rot(self.grid_size, self.grid_spacing, self.init_trans, self.zdock_output_data[pose_num-1,0:3].copy(), self.zdock_output_data[pose_num-1,3:].copy(), current_mobile_coord, self.switch)
+        self.static_mobile_copy_uni.trajectory.ts._pos[self.static_num_atoms:,:] = self.zdock_trans_rot(self.grid_size, self.grid_spacing, self.init_trans, self.zdock_output_data[pose_num-1,0:3].copy(), self.zdock_output_data[pose_num-1,3:6].copy(), current_mobile_coord, self.switch)
 
     def get_MDAnalysis_Wrapper(self):
         return self.static_mobile_copy_uni
@@ -236,10 +236,10 @@ class ZDOCK(object):
             current_mobile_coord = self.get_mobile_origin_coord(self.temp_mobile_selection.positions)
 
         if mobile_only:
-            return self.zdock_trans_rot(self.grid_size, self.grid_spacing, self.init_trans, self.zdock_output_data[pose_num-1,0:3].copy(), self.zdock_output_data[pose_num-1,3:].copy(), current_mobile_coord, self.switch)
+            return self.zdock_trans_rot(self.grid_size, self.grid_spacing, self.init_trans, self.zdock_output_data[pose_num-1,0:3].copy(), self.zdock_output_data[pose_num-1,3:6].copy(), current_mobile_coord, self.switch)
 
         else:
-            return np.append(current_static_coord, self.zdock_trans_rot(self.grid_size, self.grid_spacing, self.init_trans, self.zdock_output_data[pose_num-1,0:3].copy(), self.zdock_output_data[pose_num-1,3:].copy(), current_mobile_coord, self.switch), axis=0)
+            return np.append(current_static_coord, self.zdock_trans_rot(self.grid_size, self.grid_spacing, self.init_trans, self.zdock_output_data[pose_num-1,0:3].copy(), self.zdock_output_data[pose_num-1,3:6].copy(), current_mobile_coord, self.switch), axis=0)
 
     def write_pose(self, pose_num, output_file_path, mobile_only=False):
         temp_coord = self.get_pose(pose_num, mobile_only=mobile_only)
