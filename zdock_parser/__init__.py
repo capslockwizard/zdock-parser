@@ -2,7 +2,7 @@ import numpy as np
 import MDAnalysis
 from numba import jit, float32
 import cStringIO
-import drsip_common
+import drsip_common as common
 import types
 import errno
 
@@ -120,7 +120,7 @@ class ZDOCK(object):
             if line[0:6] in ['ATOM  ', 'HETATM']:
                 new_pdb_str += line[0:54] + '\n'
 
-        return drsip_common.convert_str_to_StrIO(new_pdb_str)
+        return common.convert_str_to_StrIO(new_pdb_str)
 
     def load_pdb_structures(self, pdb_stringio):
         return MDAnalysis.Universe(MDAnalysis.lib.util.NamedStream(pdb_stringio, 'marked.pdb'))
@@ -243,6 +243,8 @@ class ZDOCK(object):
 
     def write_pose(self, pose_num, output_file_path, mobile_only=False):
         temp_coord = self.get_pose(pose_num, mobile_only=mobile_only)
+
+        common.makedir(output_file_path)
 
         if mobile_only:
             self.mobile_uni.atoms.positions = temp_coord
